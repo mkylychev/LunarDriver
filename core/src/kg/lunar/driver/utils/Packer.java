@@ -3,9 +3,6 @@ package kg.lunar.driver.utils;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.tools.texturepacker.TexturePacker;
 
-/**
- * Created by myrzabek on 7/20/17.
- */
 
 public class Packer {
     public static void main(String[] args) {

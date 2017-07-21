@@ -17,6 +17,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
 import com.boontaran.games.StageGame;
 
 public class LunarDriver extends Game {
+    public static final int SHOW_BANNER = 1;
     private boolean loadingAssets = false;
     private AssetManager assetManager;
 
