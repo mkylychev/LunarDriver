@@ -17,13 +17,25 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
 import com.boontaran.games.StageGame;
 
 public class LunarDriver extends Game {
+
     public static final int SHOW_BANNER = 1;
+    public static final int HIDE_BANNER = 2;
+    public static final int LOAD_INTERSTITIAL = 3;
+    public static final int SHOW_INTERSTITIAL = 4;
+    public static final int OPEN_MARKET = 5;
+    public static final int SHARE = 6;
+
     private boolean loadingAssets = false;
     private AssetManager assetManager;
 
     public static TextureAtlas atlas;
     public static BitmapFont font;
 
+    private GameCallBack gameCallBack;
+
+    public LunarDriver(GameCallBack gameCallBack) {
+        this.gameCallBack = gameCallBack;
+    }
 
     @Override
     public void create() {
@@ -72,11 +84,13 @@ public class LunarDriver extends Game {
         assetManager.dispose();
         super.dispose();
     }
-    private void onAssetsLoaded(){
+
+    private void onAssetsLoaded() {
         atlas = assetManager.get("images_ru/pack.atlas", TextureAtlas.class);
         font = assetManager.get("font40.ttf", BitmapFont.class);
     }
-    private void exitApp(){
+
+    private void exitApp() {
         Gdx.app.exit();
     }
 
