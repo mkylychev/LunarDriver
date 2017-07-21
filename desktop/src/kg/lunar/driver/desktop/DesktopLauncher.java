@@ -2,11 +2,11 @@ package kg.lunar.driver.desktop;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import kg.lunar.driver.MyGdxGame;
+import kg.lunar.driver.LunarDriver;
 
 public class DesktopLauncher {
 	public static void main (String[] arg) {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-		new LwjglApplication(new MyGdxGame(), config);
+		new LwjglApplication(new LunarDriver(), config);
 	}
 }
