@@ -46,7 +46,7 @@ public class AndroidLauncher extends AndroidApplication {
 
     private GameCallBack gameCallBack = new GameCallBack() {
         @Override
-        public void sendMassege(int massage) {
+        public void sendMassage(int massage) {
             if (massage == LunarDriver.SHOW_BANNER) {
                 AndroidLauncher.this.runOnUiThread(new Runnable() {
                     @Override
@@ -82,8 +82,8 @@ public class AndroidLauncher extends AndroidApplication {
             } else if (massage == LunarDriver.SHARE) {
                 Intent sharingIntent = new Intent(Intent.ACTION_SEND);
                 sharingIntent.setType("text/plain");
-                String shareTitle = "Lunar Driver";
-                String shareBody = "Try this game: ";
+                String shareTitle = getString(R.string.share_title);
+                String shareBody = getString(R.string.share_body);
                 String url = getString(R.string.share_uri);
 
                 String body = shareBody + url;
@@ -91,7 +91,7 @@ public class AndroidLauncher extends AndroidApplication {
                 sharingIntent.putExtra(Intent.EXTRA_SUBJECT,shareTitle);
                 sharingIntent.putExtra(Intent.EXTRA_SUBJECT,body);
 
-                startActivity(Intent.createChooser(sharingIntent,"Share via"));
+                startActivity(Intent.createChooser(sharingIntent,getString(R.string.share_via)));
 
 
             }

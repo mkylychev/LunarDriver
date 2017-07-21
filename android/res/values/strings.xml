@@ -3,5 +3,8 @@
 
     <string name="app_name">LunarDriver</string>
     <string name="share_uri">https://play.google.com/store/apps/details?id=kg.lunar.driver</string>
+    <string name="share_title">Lunar Driver</string>
+    <string name="share_body">Try this game:</string>
+    <string name="share_via">Share via</string>
 
 </resources>
