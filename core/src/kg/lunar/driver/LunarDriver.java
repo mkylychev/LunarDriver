@@ -32,14 +32,14 @@ public class LunarDriver extends Game {
 
         loadingAssets = true;
         assetManager = new AssetManager();
-        assetManager.load("images/pack.atlas", TextureAtlas.class);
+        assetManager.load("images_ru/pack.atlas", TextureAtlas.class);
         assetManager.load("musics/music1.ogg", Music.class);
         assetManager.load("musics/level_win.ogg", Music.class);
         assetManager.load("musics/level_failed.ogg", Music.class);
 
         assetManager.load("sounds/level_completed.ogg", Sound.class);
         assetManager.load("sounds/click.ogg", Sound.class);
-        assetManager.load("sounds/crash", Sound.class);
+        assetManager.load("sounds/crash.ogg", Sound.class);
         assetManager.load("sounds/fail.ogg", Sound.class);
 
         FileHandleResolver resolver = new InternalFileHandleResolver();

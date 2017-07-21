@@ -5,7 +5,6 @@ import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.sun.xml.internal.bind.v2.model.core.ID;
 
 import kg.lunar.driver.LunarDriver;
 
