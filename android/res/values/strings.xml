@@ -2,5 +2,6 @@
 <resources>
 
     <string name="app_name">LunarDriver</string>
+    <string name="share_uri">https://play.google.com/store/apps/details?id=kg.lunar.driver</string>
 
 </resources>
