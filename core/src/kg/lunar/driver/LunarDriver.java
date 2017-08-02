@@ -19,6 +19,10 @@ import com.boontaran.games.StageGame;
 
 import java.util.Locale;
 
+import kg.lunar.driver.media.Media;
+import kg.lunar.driver.screens.Intro;
+import kg.lunar.driver.utils.Data;
+
 public class LunarDriver extends Game {
 
     public static final int SHOW_BANNER = 1;
@@ -37,6 +41,11 @@ public class LunarDriver extends Game {
     private I18NBundle bundle;
     private String path_to_atlas;
     private GameCallBack gameCallBack;
+
+    public static Media media;
+    private Intro intro;
+
+    public static Data data;
 
     public LunarDriver(GameCallBack gameCallBack) {
         this.gameCallBack = gameCallBack;
@@ -75,6 +84,9 @@ public class LunarDriver extends Game {
 
         assetManager.load("font40.ttf", BitmapFont.class, sizeParams);
 
+        media = new Media(assetManager);
+        data = new Data();
+
 
     }
 
@@ -98,10 +110,31 @@ public class LunarDriver extends Game {
     private void onAssetsLoaded() {
         atlas = assetManager.get(path_to_atlas, TextureAtlas.class);
         font = assetManager.get("font40.ttf", BitmapFont.class);
+
+        showIntro();
     }
 
     private void exitApp() {
         Gdx.app.exit();
+    }
+
+    private void showIntro(){
+        intro =new Intro();
+        setScreen(intro);
+        intro.setCallback(new StageGame.Callback() {
+            @Override
+            public void call(int code) {
+                if(code==Intro.ON_PLAY){
+                    hideIntro();
+                }else if(code == Intro.ON_BACK){
+                    exitApp();
+                }
+            }
+        });
+    }
+
+    private void hideIntro(){
+        intro = null;
     }
 
 }
