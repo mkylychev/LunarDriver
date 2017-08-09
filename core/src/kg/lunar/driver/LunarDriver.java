@@ -7,10 +7,8 @@ import com.badlogic.gdx.assets.loaders.FileHandleResolver;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeType;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGeneratorLoader;
 import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
@@ -19,6 +17,7 @@ import com.boontaran.games.StageGame;
 
 import java.util.Locale;
 
+import kg.lunar.driver.screens.LevelList;
 import kg.lunar.driver.media.Media;
 import kg.lunar.driver.screens.Intro;
 import kg.lunar.driver.utils.Data;
@@ -46,6 +45,7 @@ public class LunarDriver extends Game {
     private Intro intro;
 
     public static Data data;
+    private LevelList levelList;
 
     public LunarDriver(GameCallBack gameCallBack) {
         this.gameCallBack = gameCallBack;
@@ -125,16 +125,52 @@ public class LunarDriver extends Game {
             @Override
             public void call(int code) {
                 if(code==Intro.ON_PLAY){
+                    showLevelList();
                     hideIntro();
                 }else if(code == Intro.ON_BACK){
                     exitApp();
                 }
             }
         });
+        media.playMusic("music1.ogg", true);
     }
+
 
     private void hideIntro(){
         intro = null;
+    }
+
+    private void showLevelList() {
+        levelList = new LevelList();
+        setScreen(levelList);
+
+        levelList.setCallback(new StageGame.Callback() {
+            @Override
+            public void call(int code) {
+
+                if (code == LevelList.ON_BACK) {
+                    showIntro();
+                    hideLevelList();
+                } else if (code == LevelList.ON_LEVEL_SELECTED) {
+                    //showLevel();
+                    hideLevelList();
+                } else if(code == LevelList.ON_OPEN_MARKET) {
+                    gameCallBack.sendMassage(OPEN_MARKET);
+
+                } else if (code == LevelList.ON_SHARE) {
+                    gameCallBack.sendMassage(SHARE);
+                }
+
+            }
+        });
+
+        gameCallBack.sendMassage(SHOW_BANNER);
+        media.playMusic("music1.ogg", true);
+    }
+
+    private void hideLevelList() {
+        levelList = null;
+        gameCallBack.sendMassage(HIDE_BANNER);
     }
 
 }

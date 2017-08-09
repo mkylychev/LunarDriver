@@ -44,6 +44,10 @@ public class LevelIcon extends Group {
         bgDown.setY(bg.getY() + (bg.getHeight() - bgDown.getHeight()) / 2);
         bgDown.setVisible(false);
 
+        lockImg = new Image(LunarDriver.atlas.findRegion("level_icon_lock"));
+        lockImg.setX((getWidth()-lockImg.getWidth())/2);
+        lockImg.setY((getHeight()-lockImg.getHeight())/2);
+
         Label.LabelStyle style = new Label.LabelStyle();
         style.font = LunarDriver.font;
         style.fontColor = new Color(0x000000ff);
@@ -52,7 +56,7 @@ public class LevelIcon extends Group {
         label.setX((getWidth() - label.getWidth()) / 2);
         label.setY((getHeight() - label.getHeight()) / 2);
 
-        //setLock(true);
+        setLock(true);
 
         addCaptureListener(new EventListener() {
             @Override

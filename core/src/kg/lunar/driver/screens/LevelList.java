@@ -1,4 +1,4 @@
-package kg.lunar.driver.levels;
+package kg.lunar.driver.screens;
 
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.scenes.scene2d.Group;

@@ -3,7 +3,7 @@ package kg.lunar.driver;
 
 
 public class Setting {
-    public static final boolean DEBAG_GAME = true;
+    public static final boolean DEBAG_GAME = false;
     public static final boolean DEBAG_WORLD = true;
 
     public static final  float GRAVITY = 8;

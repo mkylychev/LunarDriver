@@ -16,12 +16,14 @@ import com.google.android.gms.ads.AdView;
 public class AndroidLauncher extends AndroidApplication {
 
     private RelativeLayout mainView;
+
     private AdView bannerView;
     private ViewGroup bannerContainer;
     private RelativeLayout.LayoutParams bannerParams;
 
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate (Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -31,55 +33,51 @@ public class AndroidLauncher extends AndroidApplication {
         mainView = new RelativeLayout(this);
         setContentView(mainView);
 
-        View gameView = initializeForView(new LunarDriver(gameCallBack));
+        View gameView = initializeForView(new LunarDriver(gameCallback));
         mainView.addView(gameView);
 
         bannerParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-        bannerParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+        bannerParams .addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
         bannerParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
-
         bannerContainer = new LinearLayout(this);
 
         mainView.addView(bannerContainer, bannerParams);
         bannerContainer.setVisibility(View.GONE);
     }
 
-    private GameCallBack gameCallBack = new GameCallBack() {
+    private GameCallBack gameCallback = new GameCallBack() {
         @Override
-        public void sendMassage(int massage) {
-            if (massage == LunarDriver.SHOW_BANNER) {
+        public void sendMassage(int message) {
+
+            if (message == LunarDriver.SHOW_BANNER) {
+                AndroidLauncher.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                    }
+                });
+            } else if (message == LunarDriver.HIDE_BANNER) {
+                AndroidLauncher.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                    }
+                });
+            } else if (message == LunarDriver.LOAD_INTERSTITIAL) {
+
+
+            } else if (message == LunarDriver.SHOW_INTERSTITIAL) {
                 AndroidLauncher.this.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
 
                     }
                 });
-
-            } else if (massage == LunarDriver.HIDE_BANNER) {
-                AndroidLauncher.this.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-
-                    }
-                });
-
-            } else if (massage == LunarDriver.LOAD_INTERSTITIAL) {
-
-
-            } else if (massage == LunarDriver.OPEN_MARKET) {
+            } else if (message == LunarDriver.OPEN_MARKET) {
                 Uri uri = Uri.parse(getString(R.string.share_uri));
                 Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
 
-            } else if (massage == LunarDriver.SHOW_INTERSTITIAL) {
-                AndroidLauncher.this.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
 
-                    }
-                });
-
-            } else if (massage == LunarDriver.SHARE) {
+            } else if ( message == LunarDriver.SHARE) {
                 Intent sharingIntent = new Intent(Intent.ACTION_SEND);
                 sharingIntent.setType("text/plain");
                 String shareTitle = getString(R.string.share_title);
@@ -88,13 +86,22 @@ public class AndroidLauncher extends AndroidApplication {
 
                 String body = shareBody + url;
 
-                sharingIntent.putExtra(Intent.EXTRA_SUBJECT,shareTitle);
-                sharingIntent.putExtra(Intent.EXTRA_SUBJECT,body);
+                sharingIntent.putExtra(Intent.EXTRA_SUBJECT, shareTitle);
+                sharingIntent.putExtra(Intent.EXTRA_SUBJECT, body);
 
-                startActivity(Intent.createChooser(sharingIntent,getString(R.string.share_via)));
+                startActivity(Intent.createChooser(sharingIntent, getString(R.string.share_via)));
 
 
             }
+
         }
     };
+
+
+
+
+
+
+
+
 }
