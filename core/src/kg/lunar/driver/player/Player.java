@@ -14,8 +14,11 @@ import com.badlogic.gdx.physics.box2d.Joint;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
+import com.badlogic.gdx.physics.box2d.joints.WeldJointDef;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.utils.Array;
+import com.boontaran.douglasPeucker.DouglasPeucker;
 import com.boontaran.games.ActorClip;
 import com.boontaran.marchingSquare.MarchingSquare;
 
@@ -27,17 +30,18 @@ import kg.lunar.driver.levels.Level;
 
 public class Player extends ActorClip implements IBody {
 
-    private Image roverImg, astronautImg, astronautFallImg, frontWheelImage, rearWheelImg;
+    private Image roverImg, astronautImg, astronautFallImg, frontWheelImage,rearWheelImg;
 
     private Group frontWheelCont, rearWheelCont, astronautFallCont;
+
     public Body rover, frontWheel, rearWheel, astronaut;
 
-    private Joint frontWheelJoint, rearWheelJoint, astronautJoint;
+    private Joint frontWheelJoint, rearWheelJoint, astroJoint;
 
     private World world;
 
-    private boolean hasDestroyed = false;
-    private boolean destroyedOnNextUpdate = false;
+    private boolean hasDestoyed = false;
+    private boolean destroyOnNextUpdate = false;
 
     private boolean isTouchGround = true;
 
@@ -46,26 +50,29 @@ public class Player extends ActorClip implements IBody {
 
     private Level level;
 
+
     public Player(Level level) {
         this.level = level;
 
         roverImg = new Image(LunarDriver.atlas.findRegion("rover"));
         childs.addActor(roverImg);
-        roverImg.setX(-roverImg.getWidth() / 2);
+        roverImg.setX(-roverImg.getWidth()/2);
+
         roverImg.setY(-15);
 
-
         astronautImg = new Image(LunarDriver.atlas.findRegion("astronaut"));
-
         childs.addActor(astronautImg);
-        roverImg.setX(-35);
-        roverImg.setY(20);
+
+        astronautImg.setX(-35);
+        astronautImg.setY(20);
+
+        astronautFallCont = new Group();
 
         astronautFallImg = new Image(LunarDriver.atlas.findRegion("astronaut_fall"));
-        astronautFallCont.addActor(astronautImg);
+        astronautFallCont.addActor(astronautFallImg);
 
-        astronautFallImg.setX(-astronautFallImg.getWidth() / 2);
-        astronautFallImg.setY(-astronautFallImg.getHeight() / 2);
+        astronautFallImg.setX(-astronautFallImg.getWidth()/2);
+        astronautFallImg.setY(-astronautFallImg.getHeight()/2);
 
     }
 
@@ -78,21 +85,39 @@ public class Player extends ActorClip implements IBody {
         return isTouchGround;
     }
 
-
     @Override
     public Body createBody(World world) {
         this.world = world;
+
         BodyDef def = new BodyDef();
         def.type = BodyDef.BodyType.DynamicBody;
         def.linearDamping = 0;
 
+        float[] vertices = traceOutline("rover_model");
+        Vector2 centroid = Level.calculateCentroid(vertices);
+
+        int i = 0;
+        while (i < vertices.length) {
+            vertices[i] -= centroid.x;
+            vertices[i + 1] -= centroid.y;
+            i += 2;
+        }
+
+        vertices = DouglasPeucker.simplify(vertices, 4);
+        Level.scaleToWorld(vertices);
+        Array<Polygon> triangles = Level.getTriangles(new Polygon(vertices));
+        rover = createBodyFromTriangles(world, triangles);
+        rover.setTransform((getX()) / Level.WORLD_SCALE, (getY()) / Level.WORLD_SCALE, 0);
+
+        frontWheel = createWheel(world, 20 / Level.WORLD_SCALE);
+        frontWheel.setTransform(rover.getPosition().x + 60 / Level.WORLD_SCALE, rover.getPosition().y - 8 / Level.WORLD_SCALE, 0);
 
         frontWheelCont = new Group();
         frontWheelImage = new Image(LunarDriver.atlas.findRegion("front_wheel"));
 
         frontWheelCont.addActor(frontWheelImage);
-        frontWheelImage.setX(-frontWheelImage.getWidth() / 2);
-        frontWheelImage.setY(-frontWheelImage.getHeight() / 2);
+        frontWheelImage.setX(-frontWheelImage.getWidth()/2);
+        frontWheelImage.setY(-frontWheelImage.getHeight()/2);
 
         getParent().addActor(frontWheelCont);
 
@@ -102,14 +127,19 @@ public class Player extends ActorClip implements IBody {
 
         RevoluteJointDef rDef = new RevoluteJointDef();
         rDef.initialize(rover, frontWheel, new Vector2(frontWheel.getPosition()));
-
         frontWheelJoint = world.createJoint(rDef);
+
+
+        rearWheel = createWheel(world, 20 / Level.WORLD_SCALE);
+        rearWheel.setTransform(rover.getPosition().x - 62 / Level.WORLD_SCALE, rover.getPosition().y - 8 / Level.WORLD_SCALE, 0);
+        rDef = new RevoluteJointDef();
+
 
         rearWheelCont = new Group();
         rearWheelImg = new Image(LunarDriver.atlas.findRegion("rear_wheel"));
         rearWheelCont.addActor(rearWheelImg);
-        rearWheelImg.setX(-rearWheelImg.getWidth() / 2);
-        rearWheelImg.setY(-rearWheelImg.getHeight() / 2);
+        rearWheelImg.setX(-rearWheelImg.getWidth()/2);
+        rearWheelImg.setY(-rearWheelImg.getHeight()/2);
 
         getParent().addActor(rearWheelCont);
         data = new UserData();
@@ -119,17 +149,41 @@ public class Player extends ActorClip implements IBody {
         rDef.initialize(rover, rearWheel, new Vector2(rearWheel.getPosition()));
         rearWheelJoint = world.createJoint(rDef);
 
+        vertices = traceOutline("astronaut_model");
+        centroid = Level.calculateCentroid(vertices);
+
+        i = 0;
+        while (i < vertices.length) {
+            vertices[i] -= centroid.x;
+            vertices[i + 1] -= centroid.y;
+
+            i+= 2;
+        }
+        vertices = DouglasPeucker.simplify(vertices, 6);
+        Level.scaleToWorld(vertices);
+        triangles = Level.getTriangles(new Polygon(vertices));
+        astronaut = createBodyFromTriangles(world, triangles);
+        astronaut.setTransform(rover.getPosition().x - 0 / Level.WORLD_SCALE, rover.getPosition().y + 30/ Level.WORLD_SCALE, 0);
+
+        WeldJointDef actronautDef = new WeldJointDef();
+        actronautDef.initialize(rover, astronaut, new Vector2(astronaut.getPosition()));
+        astroJoint = world.createJoint(actronautDef);
+
+
+
 
         return rover;
     }
 
     private Body createWheel(World world, float rad) {
+
         BodyDef def = new BodyDef();
         def.type = BodyDef.BodyType.DynamicBody;
         def.linearDamping = 0;
         def.angularDamping = 1f;
 
         Body body = world.createBody(def);
+
         FixtureDef fDef = new FixtureDef();
         CircleShape shape = new CircleShape();
         shape.setRadius(rad);
@@ -142,22 +196,24 @@ public class Player extends ActorClip implements IBody {
         body.createFixture(fDef);
         shape.dispose();
 
+
         return body;
     }
 
-    private float[] traceOutLine(String regionName) {
-        Texture boduOutLine = LunarDriver.atlas.findRegion(regionName).getTexture();
+    private float[] traceOutline(String regionName) {
+
+        Texture bodyOutLine = LunarDriver.atlas.findRegion(regionName).getTexture();
         TextureAtlas.AtlasRegion reg = LunarDriver.atlas.findRegion(regionName);
         int w = reg.getRegionWidth();
         int h = reg.getRegionHeight();
         int x = reg.getRegionX();
         int y = reg.getRegionY();
 
-        boduOutLine.getTextureData().prepare();
-        Pixmap allPixmap = boduOutLine.getTextureData().consumePixmap();
+        bodyOutLine.getTextureData().prepare();
+        Pixmap allPixmap = bodyOutLine.getTextureData().consumePixmap();
 
-        Pixmap pixmap = new Pixmap(w, h, Pixmap.Format.RGB888);
-        pixmap.drawPixmap(allPixmap, 0, 0, x, y, w, h);
+        Pixmap pixmap = new Pixmap(w, h, Pixmap.Format.RGBA8888);
+        pixmap.drawPixmap(allPixmap,0,0,x,y,w,h);
 
         allPixmap.dispose();
 
@@ -165,9 +221,10 @@ public class Player extends ActorClip implements IBody {
 
         w = pixmap.getWidth();
         h = pixmap.getHeight();
-        int[][] map;
+
+        int [][] map;
         map = new int[w][h];
-        for (x = 0; x < w; x++) {
+        for (x=0; x < w; x++) {
             for (y = 0; y < h; y++) {
                 pixel = pixmap.getPixel(x, y);
                 if ((pixel & 0x000000ff) == 0) {
@@ -179,15 +236,16 @@ public class Player extends ActorClip implements IBody {
         }
 
         pixmap.dispose();
+
         MarchingSquare ms = new MarchingSquare(map);
         ms.invertY();
-        ArrayList<float[]> trces = ms.traceMap();
+        ArrayList<float[]> traces = ms.traceMap();
 
-        float[] polyVertices = trces.get(0);
+        float[] polyVertices = traces.get(0);
         return polyVertices;
     }
 
-    private Body createBodyFromTriangles(World world, ArrayList<Polygon> triangles) {
+    private Body createBodyFromTriangles(World world, Array<Polygon> triangles) {
         BodyDef def = new BodyDef();
         def.type = BodyDef.BodyType.DynamicBody;
         def.linearDamping = 0;
@@ -210,21 +268,21 @@ public class Player extends ActorClip implements IBody {
 
     public void onKey(boolean moveFrontKey, boolean moveBackKey) {
         float torque = Setting.WEEL_TORQUE;
-        float maxAv = 18;
+        float maxAV = 18;
 
         if (moveFrontKey) {
-            if (-rearWheel.getAngularVelocity() < maxAv) {
+            if (-rearWheel.getAngularVelocity() < maxAV) {
                 rearWheel.applyTorque(-torque, true);
             }
-            if (-frontWheel.getAngularVelocity() < maxAv) {
+            if (-frontWheel.getAngularVelocity() < maxAV) {
                 frontWheel.applyTorque(-torque, true);
             }
         }
         if (moveBackKey) {
-            if (rearWheel.getAngularVelocity() < maxAv) {
+            if (rearWheel.getAngularVelocity() < maxAV) {
                 rearWheel.applyTorque(torque, true);
             }
-            if (frontWheel.getAngularVelocity() < maxAv) {
+            if (frontWheel.getAngularVelocity() < maxAV) {
                 frontWheel.applyTorque(torque, true);
             }
         }
@@ -240,7 +298,7 @@ public class Player extends ActorClip implements IBody {
         jumpWait = 0.3f;
     }
 
-    public void jumpForward(float value) {
+    public void jumpForward(float value){
         if (value < 0.2f) value = 0.2f;
 
         rover.applyLinearImpulse(0, jumpImpulse * value,
@@ -252,20 +310,21 @@ public class Player extends ActorClip implements IBody {
 
     @Override
     public void act(float delta) {
-        if(jumpWait>0){
-            jumpWait-=delta;
+        if (jumpWait > 0) {
+            jumpWait -= delta;
         }
 
-        if(destroyedOnNextUpdate){
-            destroyedOnNextUpdate=false;
+        if (destroyOnNextUpdate) {
+            destroyOnNextUpdate = false;
             world.destroyJoint(frontWheelJoint);
             world.destroyJoint(rearWheelJoint);
-            world.destroyJoint(astronautJoint);
+            world.destroyJoint(astroJoint);
             world.destroyBody(astronaut);
             astronautImg.remove();
 
             astronautFall();
         }
+
         super.act(delta);
     }
 
@@ -307,12 +366,13 @@ public class Player extends ActorClip implements IBody {
     }
 
     public void destroy() {
-        if (hasDestroyed) return;
-        hasDestroyed = true;
-        destroyedOnNextUpdate =true;
+        if (hasDestoyed) return;
+        hasDestoyed = true;
+
+        destroyOnNextUpdate = true;
     }
 
     public boolean isHasDestoyed() {
-        return hasDestroyed;
+        return hasDestoyed;
     }
 }
